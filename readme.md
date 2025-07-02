@@ -1,0 +1,590 @@
+<article>
+<header>
+    <h1>✅ React Web App Development Guidelines</h1>
+  <p>
+    This document provides a <strong>comprehensive and detailed</strong> set of guidelines tailored specifically for developing robust React web applications
+    within <strong>Visual Studio Code</strong> using <strong>Augment</strong>. The goal is to ensure your project is built with
+    <em>scalability, modularity, maintainability, security, and future extensibility</em> at its core.
+  </p>
+  <p>
+    Copy and Paste this document, after this point, into Augment after your design description.  Augment will accept your application description and the following guidelines as the basis for the design of your new React Web Appplication.
+  </p>
+</header>
+<hr>
+<main>
+  <h2>✅ React Web App Development Guidelines</h2>
+  <h2>🔒 Storage & Data Handling</h2>
+  <ul>
+    <li>
+      <strong>IndexedDB as Primary Storage:</strong> Use modern IndexedDB wrappers like
+      <a href="https://www.npmjs.com/package/idb" target="_blank" rel="noopener noreferrer">idb</a>
+      or
+      <a href="https://dexie.org/" target="_blank" rel="noopener noreferrer">Dexie</a>
+      for efficient, asynchronous, transactional data persistence that outperforms localStorage for complex data.
+      Consider building custom wrappers around these libraries for additional tailored functionality.
+    </li>
+    <li>
+      <strong>Promise-based Abstractions:</strong> All data access should be wrapped in Promise-based APIs or async/await to ensure clean, non-blocking code.
+      This pattern facilitates error handling and seamless integration with React hooks.
+    </li>
+    <li>
+      <strong>Versioned Schema Management & Data Migrations:</strong> Implement explicit versioning for your IndexedDB schema.
+      When schema updates are required, write robust migration functions that carefully transform or archive legacy data without loss.
+      Automate this process to avoid runtime issues during app upgrades.
+    </li>
+    <li>
+      <strong>React Hooks for Encapsulation:</strong> Create custom hooks like <code>usePersistentStore()</code> that encapsulate data handling logic,
+      abstracting complexities of IndexedDB and exposing clean APIs for components.
+      These hooks should also support subscription to changes, optimistic UI updates, and error states.
+    </li>
+    <li>
+      <strong>Factory Reset with User Safeguards:</strong> Implement a deliberate 2-step reset procedure:
+      <ol>
+        <li>User triggers reset from the UI, e.g., a “Reset App Data” button.</li>
+        <li>A modal confirmation dialog appears with a clear warning and an optional “Undo” delay before actual clearing.</li>
+      </ol>
+      This prevents accidental data loss and improves user trust.
+    </li>
+    <li>
+      <strong>Graceful QuotaExceededError Handling:</strong> Detect storage quota limitations early, catch
+      <code>QuotaExceededError</code>, notify users with friendly UI messages,
+      and optionally provide data pruning or compression options.
+      Implement fallback strategies or sync data with server storage if applicable.
+    </li>
+    <li>
+      <strong>Encrypt Sensitive Data Client-Side:</strong> Use libraries like <code>crypto-js</code> or
+      the native <code>window.crypto.subtle</code> API for cryptographic operations.
+      Encrypt Personally Identifiable Information (PII), session tokens, or other sensitive values before storage.
+      Avoid plaintext persistence anywhere.
+    </li>
+    <li>
+      <strong>Security of Credentials:</strong> Avoid storing passwords, access tokens, refresh tokens, or credentials in localStorage or IndexedDB unless encrypted.
+      Prefer ephemeral in-memory storage for critical secrets, renewing tokens frequently and using secure HTTP-only cookies for authentication where possible.
+    </li>
+  </ul>
+
+  <h2>🧱 Architecture & Design Patterns</h2>
+  <ul>
+    <li>
+      <strong>Adapted MVC Model for React:</strong> Use a clear separation of concerns to maintain clean architecture:
+      <ul>
+        <li><strong>Model:</strong> Encapsulate all business logic, API service clients, persistent data stores, and data normalization.</li>
+        <li><strong>View:</strong> Develop fully stateless, pure functional React components focused on UI rendering only.</li>
+        <li><strong>Controller:</strong> Build custom React hooks and Context Providers to manage state, side effects, and orchestration between Model and View.</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Model Context Protocol (MCP) as Universal Language:</strong> Implement MCP as the foundational protocol for ALL communication - internal, external, and inter-application.
+      MCP serves as the universal language that enables AI agents to seamlessly interact with and control your React application, making it part of a larger AI-driven ecosystem.
+    </li>
+    <li>
+      <strong>Normalize API Data:</strong> Use tools like
+      <code>normalizr</code> or hand-crafted reducer mapping functions to flatten and normalize complex API payloads,
+      facilitating predictable state updates and efficient cache invalidation.
+    </li>
+    <li>
+      <strong>Feature Flags & Policy-Based Access Control:</strong> Integrate feature toggles and role-based access control (RBAC) at the UI and API layers,
+      using Higher-Order Components (HOCs) or hooks to dynamically control visibility, access, and functionality per user or environment.
+    </li>
+    <li>
+      <strong>Secure-by-Design Principles:</strong> Enforce Content Security Policy (CSP), Subresource Integrity (SRI), and secure HTTPS origins throughout.
+      Incorporate strict HTTP headers, and ensure minimal attack surfaces by sanitizing all inputs.
+    </li>
+  </ul>
+
+  <h2>🧠 Model Context Protocol (MCP) - AI-First Architecture</h2>
+  <p>
+    <strong>MCP is the universal protocol</strong> that enables AI agents to interact with your React application.
+    Design your app as <em>MCP-native from the ground up</em>, assuming AI will be the primary interface for performing work.
+    Every component, service, and data flow should be accessible and controllable via MCP endpoints.
+  </p>
+
+  <h3>🤖 AI-First Design Principles</h3>
+  <ul>
+    <li><strong>AI as Primary User:</strong> Design APIs, state management, and business logic assuming AI agents will be the main consumers, not just human users.</li>
+    <li><strong>MCP-Native Components:</strong> Every React component should expose its capabilities through MCP tools and resources.</li>
+    <li><strong>Declarative Intent:</strong> Structure your app so AI can express high-level intentions that get translated into specific UI actions.</li>
+    <li><strong>Universal Protocol:</strong> MCP serves as the common language between different AI-enabled applications in your ecosystem.</li>
+  </ul>
+
+  <h3>🏗️ Core MCP Modules</h3>
+  <ul>
+    <li><strong>SessionManager:</strong> Exposes authentication, token lifecycle, and session state via MCP tools for AI-driven user management.</li>
+    <li><strong>MemoryCache:</strong> Provides MCP access to local settings, drafts, preferences - allowing AI to persist and retrieve context across sessions.</li>
+    <li><strong>ToolRegistry:</strong> Dynamically loads/unloads features based on AI requests, user roles, or runtime conditions via MCP resource discovery.</li>
+    <li><strong>StateSyncEngine:</strong> Handles real-time state updates and conflict resolution, exposing state manipulation tools for AI coordination.</li>
+  </ul>
+
+  <h3>Mermaid Diagram: AI-First MCP Architecture</h3>
+  <div class="mermaid">
+    graph TD
+      AI[AI Agent] -->|MCP Protocol| MCPServer[MCP Server]
+      MCPServer -->|Tools & Resources| SessionManager
+      MCPServer -->|Tools & Resources| MemoryCache
+      MCPServer -->|Tools & Resources| ToolRegistry
+      MCPServer -->|Tools & Resources| StateSyncEngine
+
+      UI[React UI] -->|Hooks| SessionManager
+      UI -->|Context Providers| MemoryCache
+      UI -->|Role-based Hooks| ToolRegistry
+      UI -->|Side Effects| StateSyncEngine
+
+      SessionManager -->|API calls| Backend["/api/session"]
+      MemoryCache -->|API calls| Backend2["/api/memory"]
+      ToolRegistry -->|API calls| Backend3["/api/tools"]
+      StateSyncEngine -->|API calls| Backend4["/api/state"]
+
+      MCPServer -.->|Observes| UI
+      AI -.->|Controls| UI
+  </div>
+
+  <h2>� MCP-Native React Implementation Patterns</h2>
+  <p>
+    Build React components and hooks that are inherently AI-accessible through MCP from day one.
+  </p>
+
+  <h3>🎯 MCP-Aware Components</h3>
+  <ul>
+    <li>
+      <strong>Expose Component Capabilities:</strong> Every component should register its available actions as MCP tools:
+      <pre><code>// UserProfileComponent.tsx
+const UserProfile = () => {
+  useMCPTool('user.profile.update', updateProfile);
+  useMCPTool('user.profile.export', exportProfile);
+  useMCPResource('user.profile.data', profileData);
+
+  return &lt;div&gt;...&lt;/div&gt;;
+};</code></pre>
+    </li>
+    <li>
+      <strong>Declarative State Exposure:</strong> Make component state accessible to AI via MCP resources:
+      <pre><code>// FormComponent.tsx
+const ContactForm = () => {
+  const [formState, setFormState] = useState({});
+
+  useMCPResource('form.contact.state', formState);
+  useMCPTool('form.contact.submit', handleSubmit);
+  useMCPTool('form.contact.validate', validateForm);
+
+  return &lt;form&gt;...&lt;/form&gt;;
+};</code></pre>
+    </li>
+    <li>
+      <strong>AI-Driven Navigation:</strong> Expose routing and navigation as MCP tools:
+      <pre><code>// Navigation.tsx
+const Navigation = () => {
+  useMCPTool('nav.goto', (path) => navigate(path));
+  useMCPTool('nav.back', () => navigate(-1));
+  useMCPResource('nav.current', location.pathname);
+
+  return &lt;nav&gt;...&lt;/nav&gt;;
+};</code></pre>
+    </li>
+  </ul>
+
+  <h3>🔄 MCP State Management</h3>
+  <ul>
+    <li>
+      <strong>Global State as MCP Resources:</strong> Expose all global state through MCP for AI visibility and control.
+    </li>
+    <li>
+      <strong>Action Dispatching via MCP Tools:</strong> Allow AI to trigger state changes through well-defined MCP tool interfaces.
+    </li>
+    <li>
+      <strong>Real-time State Sync:</strong> Use MCP's streaming capabilities to keep AI agents synchronized with application state changes.
+    </li>
+  </ul>
+
+  <h3>🛠️ Custom MCP Hooks</h3>
+  <ul>
+    <li>
+      <strong>useMCPTool:</strong> Register component actions as callable MCP tools.
+    </li>
+    <li>
+      <strong>useMCPResource:</strong> Expose component data as readable MCP resources.
+    </li>
+    <li>
+      <strong>useMCPPrompt:</strong> Create dynamic prompts that AI can use to understand component context.
+    </li>
+    <li>
+      <strong>useMCPSubscription:</strong> Subscribe to AI-initiated events and state changes.
+    </li>
+  </ul>
+
+  <h2>🌐 MCP Ecosystem & Inter-Application Communication</h2>
+  <p>
+    When every application is MCP-native, AI agents can orchestrate complex workflows across multiple applications seamlessly.
+  </p>
+
+  <h3>🔗 Cross-Application Workflows</h3>
+  <ul>
+    <li>
+      <strong>Universal Protocol:</strong> MCP enables AI to treat different applications as interchangeable tools in a larger workflow.
+    </li>
+    <li>
+      <strong>Composable Applications:</strong> Design your React app to be a composable piece in larger AI-orchestrated business processes.
+    </li>
+    <li>
+      <strong>Shared Context:</strong> Use MCP's context sharing capabilities to maintain state and context across different applications.
+    </li>
+    <li>
+      <strong>Workflow Orchestration:</strong> AI can coordinate complex multi-step processes that span multiple MCP-enabled applications.
+    </li>
+  </ul>
+
+  <h3>🤝 Application Interoperability</h3>
+  <ul>
+    <li>
+      <strong>Standard Interfaces:</strong> Implement common MCP tool patterns (CRUD operations, navigation, data export/import) for consistency across applications.
+    </li>
+    <li>
+      <strong>Resource Discovery:</strong> Expose application capabilities through MCP resource discovery so AI can understand what your app can do.
+    </li>
+    <li>
+      <strong>Event Broadcasting:</strong> Use MCP to broadcast significant events that other applications in the ecosystem might need to react to.
+    </li>
+    <li>
+      <strong>Data Portability:</strong> Design data structures and APIs that facilitate easy data movement between MCP-enabled applications.
+    </li>
+  </ul>
+
+  <h2>�💡 Code Safety & Best Practices</h2>
+  <ul>
+    <li>
+      Enable <code>'use strict'</code> mode globally for improved error detection and stricter parsing rules.
+      This helps catch silent errors early in the development lifecycle.
+    </li>
+    <li>
+      Use <em>clear, descriptive, and self-documenting</em> naming conventions, e.g.,
+      <code>useUserSession</code> for hooks managing user authentication state, or <code>FormStateProvider</code> for context providers managing complex form state.
+    </li>
+    <li>
+      Validate and sanitize all user inputs rigorously using
+      libraries like <code>yup</code>, <code>zod</code>, or integrations with <code>react-hook-form</code>.
+      Enforce schema-driven validation to prevent invalid or malicious data.
+    </li>
+    <li>
+      Prevent global scope pollution:
+      Organize code in ES modules, avoid global variables, and use state managers such as
+      <a href="https://zustand-demo.pmnd.rs/" target="_blank" rel="noopener noreferrer">Zustand</a> or
+      <a href="https://redux-toolkit.js.org/" target="_blank" rel="noopener noreferrer">Redux Toolkit</a>
+      for predictable global state.
+    </li>
+    <li>
+      Implement robust error handling:
+      Use React <code>ErrorBoundary</code> components for UI crash recovery,
+      fetch abort controllers to cancel unnecessary API calls,
+      and automatic retry logic with exponential backoff on transient network failures.
+    </li>
+    <li>
+      <strong>Structured Error Logging:</strong> Log errors in a consistent format:
+      <code>[HH:MM:SS AM/PM] &lt;Element&gt; tag #X: &lt;message&gt; at line L, column C</code>
+      This enables easier debugging and error tracking across the application.
+    </li>
+    <li>
+      <strong>Fallback Behavior:</strong> Provide robust error handling with fallback behavior for all critical operations.
+      Ensure the application remains functional even when non-critical features fail.
+    </li>
+    <li>
+      <strong>Network Request Resilience:</strong> Add timeouts and retry logic to all fetch requests.
+      Implement exponential backoff for failed requests and graceful degradation for offline scenarios.
+    </li>
+    <li>
+      <strong>Avoid Global State Pollution:</strong> Use IIFEs (Immediately Invoked Function Expressions) or ES modules to prevent global scope pollution.
+      Organize code in modules and avoid global variables that can cause naming conflicts.
+    </li>
+  </ul>
+
+  <h2>📄 Documentation & Versioning</h2>
+  <ul>
+    <li>
+      Document every custom hook, utility function, context provider, and API interaction with
+      <a href="https://tsdoc.org/" target="_blank" rel="noopener noreferrer">TSDoc</a> or <code>JSDoc</code>
+      to enable clear IDE tooltips and automated docs generation.
+    </li>
+    <li>
+      <strong>Comprehensive Documentation:</strong> Document all functions, data structures (objects, arrays), and public APIs in both README and inline comments.
+      Maintain comprehensive <code>README.md</code> with setup, architectural decisions, and coding standards.
+    </li>
+    <li>
+      <strong>Version Management:</strong> Update app and README version numbers on each release or change.
+      Use <a href="https://semver.org/" target="_blank" rel="noopener noreferrer">semantic versioning (semver)</a> format (MAJOR.MINOR.PATCH).
+      Maintain a detailed <code>CHANGELOG.md</code> with summaries, version bumps, and test logs.
+    </li>
+    <li>
+      Manage environment variables securely:
+      Use <code>.env.local</code> for secret keys and API endpoints specific to developer machines,
+      and provide a sanitized <code>.env.example</code> template for collaborators.
+    </li>
+    <li>
+      Generate and maintain a <code>/docs/</code> folder automatically using tools like:
+      <ul>
+        <li>Swagger/OpenAPI for REST API contracts and endpoint documentation</li>
+        <li>Mermaid for architectural diagrams</li>
+        <li><a href="https://github.com/pahen/madge" target="_blank" rel="noopener noreferrer">Madge</a> for dependency graphs</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Automated Documentation:</strong> Use tools like
+      <a href="https://github.com/documentationjs/documentation" target="_blank" rel="noopener noreferrer">documentation.js</a>
+      to automatically generate documentation from your JSDoc/TSDoc comments. These tools work together - write good JSDoc comments in your code, then use documentation.js to generate readable documentation from them.
+    </li>
+    <li>
+      Update .gitignore with any new changes that are relevant.
+    </li>
+  </ul>
+
+  <h2>🧑‍🦽 UI/UX & Accessibility</h2>
+  <ul>
+    <li>
+      Always use semantic HTML5 elements (<code>&lt;main&gt;</code>, <code>&lt;nav&gt;</code>, <code>&lt;section&gt;</code>, etc.) and ARIA roles
+      to improve screen reader compatibility and SEO.
+    </li>
+    <li>
+      Provide a fully responsive design that adapts to screen size, using CSS variables for themes,
+      media queries for breakpoints, and prefers-color-scheme for dark mode.
+    </li>
+    <li>
+      Use skeleton loaders or shimmer placeholders during data fetching to improve perceived performance.
+      Include a <code>&lt;noscript&gt;</code> fallback message for users with JavaScript disabled.
+    </li>
+    <li>
+      Support comprehensive keyboard navigation, logical tab order, and focus states.
+      Regularly audit accessibility using tools like Lighthouse, axe-core, and manual testing with screen readers.
+    </li>
+    <li>
+      <strong>HTML/CSS Integrity:</strong> Keep all HTML/CSS intact; changes must be drop-in compatible.
+      Implement ARIA attributes, keyboard navigation, high color contrast, and screen reader testing.
+    </li>
+    <li>
+      <strong>Dark Mode Support:</strong> Add dark mode toggle or media query support with preference storage.
+      Use CSS custom properties for theme switching and respect user's system preferences.
+    </li>
+    <li>
+      <strong>Loading States:</strong> Use Skeleton Screens (not spinners) for async loading.
+      Handle dynamic rendering for delayed/partial data to improve perceived performance.
+    </li>
+    <li>
+      <strong>SEO & Discoverability:</strong> Include basic SEO (title, description, OpenGraph) and a <code>robots.txt</code>.
+      Ensure proper meta tags and structured data for search engine optimization.
+    </li>
+    <li>
+      <strong>Fixed Readme Button:</strong> Add a fixed top "Readme" button that:
+      <ul>
+        <li>Opens scrollable popup (Markdown via Marked.js) of readme.md markdown</li>
+        <li>Has visible "X" close button</li>
+        <li>Styled clearly and overlays content</li>
+      </ul>
+    </li>
+  </ul>
+
+  <h2>🚀 Performance & Optimization</h2>
+  <ul>
+    <li>
+      Lazy-load components, routes, and heavy dependencies with <code>React.lazy</code> and
+      <code>Suspense</code> to reduce initial bundle size and speed up load times.
+    </li>
+    <li>
+      Leverage service workers via
+      <a href="https://developers.google.com/web/fundamentals/primers/service-workers" target="_blank" rel="noopener noreferrer">Workbox</a>
+      to enable Progressive Web App (PWA) features like offline support, caching, and background sync.
+    </li>
+    <li>
+      Defer loading of non-critical CSS and JavaScript.
+      Use passive event listeners and throttle/debounce event handlers to reduce main thread congestion.
+    </li>
+    <li>
+      Continuously monitor runtime performance using
+      <a href="https://web.dev/vitals/" target="_blank" rel="noopener noreferrer">web-vitals</a>,
+      Lighthouse audits, and Chrome DevTools profiling.
+      Use results to identify bottlenecks and guide optimizations.
+    </li>
+    <li>
+      <strong>PWA Features:</strong> Include a complete <code>manifest.json</code> for PWA features.
+      Use Service Workers for caching, offline support, and update handling.
+    </li>
+    <li>
+      <strong>Offline-First Strategy:</strong> Use offline-first caching with write-through sync on reconnect.
+      Simulate slow networks/devices in testing to ensure robust performance.
+    </li>
+    <li>
+      <strong>Immutable Updates:</strong> Prefer immutable updates using libraries like Immer.js or Redux.
+      This improves performance and makes state changes more predictable.
+    </li>
+    <li>
+      <strong>Event Optimization:</strong> Throttle events (scroll/resize) via <code>requestAnimationFrame</code> or debounce.
+      Use passive event listeners to improve scroll performance.
+    </li>
+    <li>
+      <strong>Asset Optimization:</strong> Use content hashing for long-term asset caching.
+      Prefetch assets based on user behavior or route visibility.
+    </li>
+    <li>
+      <strong>Code Splitting:</strong> Eliminate unused code with tree shaking; import libraries modularly.
+      Use dynamic imports for route-based and component-based code splitting.
+    </li>
+  </ul>
+
+  <h2>🧪 Testing & Build Pipeline</h2>
+  <ul>
+    <li>
+      Write unit and integration tests using <code>jest</code> and
+      <a href="https://testing-library.com/docs/react-testing-library/intro" target="_blank" rel="noopener noreferrer">@testing-library/react</a>.
+      Use
+      <a href="https://www.cypress.io/" target="_blank" rel="noopener noreferrer">Cypress</a>
+      or Playwright for end-to-end testing with realistic user workflows.
+    </li>
+    <li>
+      Automate testing and deployment.
+      Configure pipelines to run linting, tests, builds, and deploy only on passing workflows.
+    </li>
+    <li>
+      Track and enforce code coverage thresholds to maintain high test quality.
+      Set up pre-merge lint/build/test gates on all pull requests to enforce code quality and consistency.
+    </li>
+    <li>
+      <strong>Comprehensive Test Coverage:</strong> Write unit tests covering:
+      <ul>
+        <li>Positive/negative test cases</li>
+        <li>Edge/boundary conditions</li>
+        <li>State transitions</li>
+        <li>Simulated failures</li>
+        <li>Performance benchmarks</li>
+      </ul>
+    </li>
+    <li>
+      <strong>Visual Regression Testing:</strong> Add automated UI regression tests with visual snapshots.
+      Use tools like Percy, Chromatic, or jest-image-snapshot for visual testing.
+    </li>
+    <li>
+      <strong>Build Automation:</strong> Include build scripts (npm, Makefile) for lint, test, and deploy steps.
+      Automate the entire development workflow from code commit to deployment.
+    </li>
+  </ul>
+
+  <h2>♻️ Reusable Design Patterns & Architectural Practices</h2>
+  <ul>
+    <li>
+      <strong>Dependency Injection (DI):</strong> Inject services via containers or factories for testing flexibility.
+      Use React Context Providers to inject APIs, services, or config throughout the app.
+    </li>
+    <li>
+      <strong>Command Pattern:</strong> Encapsulate user actions (e.g., SubmitFormCommand) for undo/logging capabilities.
+      This enables action replay, undo functionality, and comprehensive audit trails.
+    </li>
+    <li>
+      <strong>Observer Pattern:</strong> Use pub/sub or RxJS for reactive UI state management.
+      Apply using React's <code>useEffect</code> hook to reactively respond to state or prop changes.
+    </li>
+    <li>
+      <strong>State Machine Pattern:</strong> Use XState or FSMs for onboarding and multi-step flows.
+      Manage complex states to model UI workflows and business logic explicitly and reliably.
+    </li>
+    <li>
+      <strong>Strategy Pattern:</strong> Swap logic at runtime (e.g., pricing algorithms, rendering strategies).
+      Enables flexible behavior modification without code changes.
+    </li>
+    <li>
+      <strong>Adapter Pattern:</strong> Normalize third-party/legacy APIs with consistent interfaces.
+      Create adapters to bridge incompatible interfaces and data formats.
+    </li>
+    <li>
+      <strong>Repository Pattern:</strong> Encapsulate DB/API logic behind a clean interface.
+      Abstract data access and provide consistent CRUD operations.
+    </li>
+    <li>
+      <strong>Facade Pattern:</strong> Hide subsystem complexity with clean public APIs.
+      Provide simplified interfaces to complex subsystems.
+    </li>
+    <li>
+      <strong>Scoped Singleton Pattern:</strong> Share config or auth state via closures/modules.
+      Ensure single instances of critical services while maintaining scope isolation.
+    </li>
+    <li>
+      <strong>Template Method Pattern:</strong> Provide overridable hooks (e.g., beforeSave, afterLoad).
+      Define algorithm structure while allowing customization of specific steps.
+    </li>
+    <li>
+      <strong>Memento Pattern:</strong> Save and restore session or undo state.
+      Enable state snapshots for undo/redo functionality and session recovery.
+    </li>
+    <li>
+      <strong>Module Federation:</strong> Use Webpack for scalable microfrontend modules.
+      Enable independent deployment and development of application modules.
+    </li>
+  </ul>
+
+  <h2>🔐 Security Best Practices</h2>
+  <ul>
+    <li>
+      <strong>Content Security Policy (CSP):</strong> Apply CSP nonces to dynamically injected scripts.
+      Implement CSP with nonces for inline scripts and strict sources for scripts, styles, and media.
+      This protects against XSS and injection attacks.
+    </li>
+    <li>
+      <strong>Zero Trust Security Model:</strong> Follow Zero Trust principles:
+      Always validate and verify tokens and permissions server-side,
+      never trust client-side assertions alone.
+    </li>
+    <li>
+      <strong>Least Privilege Principle:</strong> Enforce Least Privilege at both UI and API layers.
+      Ensure users and components only receive access strictly necessary for their roles.
+    </li>
+  </ul>
+
+  <h2>🧠 Semantic Type Prompts for AI-Assisted Extensions</h2>
+  <p>
+    Define detailed semantic annotations within your source code to enable intelligent AI-powered code generation, refactoring, and module extension via Augment or similar tools.
+  </p>
+  <ul>
+    <li>
+      Include semantic block comments at the top of each module describing its purpose, type, extensibility, and AI use cases, for example:
+      <pre><code>/**
+ * SemanticType: PersistentLocalStorageHook
+ * Description: Provides reactive access to IndexedDB for caching user preferences and session data.
+ * ExtensibleByAI: true
+ * AIUseCases:
+ *   - Add encryption layer
+ *   - Support export/import feature
+ *   - Migrate schema version to add "lastLogin" timestamp
+ */</code></pre>
+    </li>
+    <li>
+      Maintain a centralized <code>augment.schema.json</code> metadata file describing all modules, semantic types, and extensibility flags:
+      <pre><code>{
+  "modules": {
+    "UserForm.tsx": {
+      "SemanticType": "DynamicFormComponent",
+      "Description": "Form for editing user profile with validation.",
+      "ExtensibleByAI": true,
+      "AIUseCases": ["Add fields", "Inject custom components", "Reorganize layout"]
+    }
+  }
+}</code></pre>
+    </li>
+    <li>
+      Common semantic types to use include:
+      <ul>
+        <li><strong>DynamicFormComponent</strong></li>
+        <li><strong>AuthSessionService</strong></li>
+        <li><strong>RoleBasedToolLoader</strong></li>
+        <li><strong>MemoryCacheEngine</strong></li>
+        <li><strong>APIInteractionModule</strong></li>
+      </ul>
+    </li>
+    <li>
+      Flag modules explicitly as <code>ExtensibleByAI: true</code> only when safe to enable controlled AI augmentation.
+    </li>
+  </ul>
+</main>
+  <hr />
+
+  <footer>
+    <p><strong>Contact & Resources:</strong></p>
+    <p>🌐 <a href="https://mytech.today" target="_blank" rel="noopener noreferrer">myTech.Today</a></p>
+    <p>📧 <a href="mailto:sales@mytech.today">sales@mytech.today</a></p>
+    <p>📞 <a href="tel:+18477674914">(847) 767-4914</a></p>
+    <p>🧑‍💻 <a href="https://github.com/mytech-today-now" target="_blank" rel="noopener noreferrer">@mytech-today-now</a></p>
+    <p>📍 Barrington, IL</p>
+  </footer>
+</article>
