@@ -1,237 +1,160 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>React Web App Development Guidelines</title>
-  <link rel="stylesheet" href="react-guidelines.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React Web App Guidelines</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      padding: 2rem;
+      line-height: 1.7;
+      background: #fff;
+      color: #111;
+    }
+    h1, h2, h3 {
+      color: #222;
+      margin-top: 2rem;
+    }
+    pre {
+      background: #f6f8fa;
+      padding: 1rem;
+      overflow-x: auto;
+    }
+    code {
+      font-family: monospace;
+    }
+    .mermaid {
+      background: #fafafa;
+      padding: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      margin-top: 1rem;
+    }
+  </style>
+  <script>
+    mermaid.initialize({ startOnLoad: true });
+  </script>
 </head>
 <body>
-  <header>
-    <h1>✅ Web App Development Guidelines for React (Print-Friendly)</h1>
-  </header>
+  <h1>✅ React Web App Development Guidelines</h1>
 
-  <main>
-    <section>
-      <h2>🔒 Storage & Data Handling</h2>
-      <ul>
-        <li>Use <strong>IndexedDB</strong> via libraries like <code>idb</code>, <code>dexie</code>, or custom wrappers.
-          <ul>
-            <li>Wrap operations in <strong>Promise-based modules</strong>.</li>
-            <li>Enforce <strong>versioned schemas</strong> and handle <strong>migrations</strong>.</li>
-            <li>Create React hooks such as <code>usePersistentStore()</code> for encapsulation.</li>
-          </ul>
-        </li>
-        <li>Provide a <strong>2-step factory reset mechanism</strong>:
-          <ol>
-            <li>Click on Reset Mechanism.</li>
-            <li>Display confirmation modal.</li>
-            <li>On confirm, clear IndexedDB and reset app state using Context or Redux.</li>
-          </ol>
-        </li>
-        <li>Catch and handle <code>QuotaExceededError</code>; notify users and log diagnostics.</li>
-        <li>Encrypt sensitive values (e.g., with <code>crypto-js</code> or <code>crypto.subtle</code>).</li>
-        <li><strong>Never</strong> store raw tokens, passwords, or credentials in local storage.</li>
-      </ul>
-    </section>
+  <p>Tailored for development in <strong>Visual Studio Code</strong> with <strong>Augment</strong> and designed for scalability, modularity, and security.</p>
 
-    <section>
-      <h2>🧱 Architecture & Design Patterns</h2>
-      <ul>
-        <li>Follow <strong>MVC</strong> adapted for React:
-          <ul>
-            <li><strong>Model</strong>: Services and data access</li>
-            <li><strong>View</strong>: Stateless components</li>
-            <li><strong>Controller</strong>: Hooks and context layers</li>
-          </ul>
-        </li>
-        <li>Implement <strong>Model Context Protocol (MCP)</strong> to manage:
-          <ul>
-            <li>Session</li>
-            <li>Persistent memory</li>
-            <li>Role-based tool access</li>
-            <li>Application state transitions</li>
-          </ul>
-        </li>
-        <li>Normalize API data using <code>normalizr</code> or reducer mapping patterns.</li>
-        <li>Use <strong>Progressive Enhancement</strong> and feature fallbacks.</li>
-        <li>Apply <strong>Policy-Based Access Control</strong> via roles, HOCs, and hooks.</li>
-        <li>Use <strong>Feature Flags</strong> stored in JSON or remote services.</li>
-        <li>Apply security design patterns: CSP, SRI, secure origin enforcement.</li>
-      </ul>
-    </section>
+  <h2>🔒 Storage & Data Handling</h2>
+  <ul>
+    <li>Use <code>IndexedDB</code> via <a href="https://www.npmjs.com/package/idb">idb</a>, <a href="https://dexie.org/">Dexie</a>, or custom wrappers.</li>
+    <li>Wrap operations in Promise-based modules.</li>
+    <li>Enforce versioned schemas and implement data migrations.</li>
+    <li>Create React hooks like <code>usePersistentStore()</code> for encapsulation.</li>
+    <li>Implement a 2-step factory reset mechanism (UI trigger & modal confirmation).</li>
+    <li>Handle <code>QuotaExceededError</code> gracefully and notify users.</li>
+    <li>Encrypt sensitive values using <code>crypto-js</code> or <code>crypto.subtle</code>.</li>
+    <li>Avoid storing tokens, passwords, or credentials in localStorage.</li>
+  </ul>
 
-    <section>
-      <h2>🧠 Model Context Protocol (MCP)</h2>
-      <ul>
-        <li>All communication—internal and external—must follow <strong>MCP standards</strong>.</li>
-        <li>Application must support:
-          <ul>
-            <li>Authentication</li>
-            <li>Role-based access</li>
-            <li>Shared collaborative editing</li>
-            <li>Version history</li>
-          </ul>
-        </li>
-        <li>MCP responsibilities:
-          <ul>
-            <li><code>SessionManager</code>: Auth and session lifecycle</li>
-            <li><code>MemoryCache</code>: Persistent local data (settings, drafts)</li>
-            <li><code>ToolRegistry</code>: Enable tools by role</li>
-            <li><code>StateSyncEngine</code>: Real-time updates and syncing</li>
-          </ul>
-        </li>
-        <li>RESTful API layer:
-          <ul>
-            <li>Example endpoints: <code>/session</code>, <code>/memory</code>, <code>/tools/:role</code>, <code>/state/:id</code></li>
-          </ul>
-        </li>
-        <li>Client integration:
-          <ul>
-            <li>Handle session bootstrapping and live state changes via hooks or Redux</li>
-          </ul>
-        </li>
-      </ul>
-    </section>
+  <h2>🧱 Architecture & Design Patterns</h2>
+  <ul>
+    <li>Use an adapted MVC model for React:</li>
+    <ul>
+      <li><strong>Model:</strong> Services, APIs, persistent storage.</li>
+      <li><strong>View:</strong> Stateless React components.</li>
+      <li><strong>Controller:</strong> Hooks and context providers.</li>
+    </ul>
+    <li>Implement Model Context Protocol (MCP).</li>
+    <li>Normalize API data using reducer mapping or libraries like <code>normalizr</code>.</li>
+    <li>Use feature flags and policy-based access control (HOCs/hooks).</li>
+    <li>Apply secure-by-design principles: CSP, SRI, secure origins.</li>
+  </ul>
 
-    <section>
-      <h2>💡 Code Safety & Best Practices</h2>
-      <ul>
-        <li>Always use <code>"strict mode"</code>.</li>
-        <li>Descriptive naming: <code>useUserSession()</code>, <code>FormStateProvider</code>, <code>ApiService</code>.</li>
-        <li>Avoid global state pollution:
-          <ul>
-            <li>Use modules, <code>React.Context</code>, <code>Recoil</code>, <code>Zustand</code>, or Redux Toolkit.</li>
-          </ul>
-        </li>
-        <li>Validate and sanitize <strong>all</strong> user inputs:
-          <ul>
-            <li>Use <code>yup</code>, <code>zod</code>, or <code>react-hook-form</code>.</li>
-          </ul>
-        </li>
-        <li>Log format:
-          <ul>
-            <li><code>[HH:MM:SS AM/PM] &lt;Component&gt;#ID: message @ line X column C</code></li>
-          </ul>
-        </li>
-        <li>Provide fallbacks:
-          <ul>
-            <li>Use <code>ErrorBoundary</code></li>
-            <li>Implement <code>AbortController</code> for timeouts</li>
-            <li>Retry logic with backoff</li>
-          </ul>
-        </li>
-      </ul>
-    </section>
+  <h2>🧠 Model Context Protocol (MCP)</h2>
+  <p>The backbone of all internal and external stateful communication.</p>
+  <ul>
+    <li><strong>SessionManager:</strong> Auth and token lifecycle</li>
+    <li><strong>MemoryCache:</strong> Settings, drafts, persistent local state</li>
+    <li><strong>ToolRegistry:</strong> Role-based feature loader</li>
+    <li><strong>StateSyncEngine:</strong> Real-time state updates and conflict resolution</li>
+  </ul>
 
-    <section>
-      <h2>📄 Documentation & Versioning</h2>
-      <ul>
-        <li>Document:
-          <ul>
-            <li>All functions, custom hooks, contexts, exposed APIs</li>
-            <li>Use TSDoc or JSDoc</li>
-          </ul>
-        </li>
-        <li>Maintain and change at updates:
-          <ul>
-            <li><code>README.md</code> with setup, deployment, architecture, version, license, branding</li>
-            <li><code>CHANGELOG.md</code> with clear version history</li>
-          </ul>
-        </li>
-        <li>Environment:
-          <ul>
-            <li><code>.env.local</code> for secrets</li>
-            <li><code>.env.example</code> for safe template</li>
-          </ul>
-        </li>
-        <li>Auto-generate <code>/docs/</code>:
-          <ul>
-            <li>API docs (Swagger/OpenAPI)</li>
-            <li>Data flow charts</li>
-            <li>Dependency graphs (madge, dependency-cruiser)</li>
-          </ul>
-        </li>
-      </ul>
-    </section>
+  <h3>Mermaid Diagram: MCP Architecture</h3>
+  <div class="mermaid">
+    graph TD
+      UI[React UI] --> |Hooks| SessionManager
+      UI --> |Context| MemoryCache
+      UI --> |Role Hooks| ToolRegistry
+      UI --> |useEffect| StateSyncEngine
+      SessionManager --> API[/session endpoint/]
+      MemoryCache --> API2[/memory endpoint/]
+      ToolRegistry --> API3[/tools/:role endpoint/]
+      StateSyncEngine --> API4[/state/:id endpoint/]
+  </div>
 
-    <section>
-      <h2>🧑‍🦽 UI/UX & Accessibility</h2>
-      <ul>
-        <li>Use semantic HTML and accessibility features (ARIA, screen readers, etc.)</li>
-        <li>Provide <code>&lt;noscript&gt;</code> fallback</li>
-        <li>Implement dark mode</li>
-        <li>Use Skeleton Screens over spinners</li>
-        <li>Ensure SEO and responsiveness for a wide range of screen sizes</li>
-        <li>Include fixed "Readme" button modal</li>
-      </ul>
-    </section>
+  <h2>💡 Code Safety & Best Practices</h2>
+  <ul>
+    <li>Use <code>'use strict'</code> mode globally.</li>
+    <li>Descriptive naming: <code>useUserSession</code>, <code>FormStateProvider</code>.</li>
+    <li>Validate and sanitize all inputs using <code>yup</code>, <code>zod</code>, or <code>react-hook-form</code>.</li>
+    <li>Avoid global scope leaks—use modules and state managers like Zustand or Redux Toolkit.</li>
+    <li>Include error boundaries, fetch abort controllers, and retry logic.</li>
+  </ul>
 
-    <section>
-      <h2>🚀 Performance & Optimization</h2>
-      <ul>
-        <li>Lazy load components and routes</li>
-        <li>Use service workers and <code>manifest.json</code> for PWA</li>
-        <li>Cache writes locally and sync on reconnect</li>
-        <li>Monitor with <code>web-vitals</code>, Lighthouse</li>
-        <li>Optimize listeners and assets</li>
-      </ul>
-    </section>
+  <h2>📄 Documentation & Versioning</h2>
+  <ul>
+    <li>Use TSDoc/JSDoc to document all custom hooks, functions, contexts, and APIs.</li>
+    <li>Maintain a detailed <code>README.md</code> and <code>CHANGELOG.md</code>.</li>
+    <li>Use <code>.env.local</code> for secrets and <code>.env.example</code> as a safe template.</li>
+    <li>Generate <code>/docs/</code> folder with Swagger/OpenAPI, Mermaid, Madge, etc.</li>
+  </ul>
 
-    <section>
-      <h2>🧪 Testing & Build Pipeline</h2>
-      <ul>
-        <li>Test using <code>jest</code>, <code>@testing-library/react</code>, <code>cypress</code>, etc.</li>
-        <li>Include test coverage and build scripts</li>
-        <li>CI/CD integration with GitHub Actions</li>
-      </ul>
-    </section>
+  <h2>🧑‍🦽 UI/UX & Accessibility</h2>
+  <ul>
+    <li>Use semantic HTML and ARIA roles.</li>
+    <li>Implement dark mode and responsive layout via CSS variables and media queries.</li>
+    <li>Provide skeleton loaders and <code>&lt;noscript&gt;</code> fallbacks.</li>
+    <li>Support keyboard navigation, screen readers, and accessibility audit tools.</li>
+  </ul>
 
-    <section>
-      <h2>♻️ Reusable Design Patterns</h2>
-      <table>
-        <thead>
-          <tr><th>Pattern</th><th>React Usage Example</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Dependency Injection</td><td>Context Providers, custom hooks</td></tr>
-          <tr><td>Command Pattern</td><td>Encapsulate <code>UndoAction</code>, etc.</td></tr>
-          <tr><td>Observer Pattern</td><td><code>useEffect</code> subscriptions, RxJS</td></tr>
-          <tr><td>State Machine</td><td>Use <code>XState</code> for flows</td></tr>
-          <tr><td>Strategy Pattern</td><td>Switch rendering logic or APIs</td></tr>
-          <tr><td>Adapter Pattern</td><td>Normalize third-party SDKs</td></tr>
-          <tr><td>Repository Pattern</td><td>Centralized API logic</td></tr>
-          <tr><td>Facade Pattern</td><td>Abstract SDK complexity</td></tr>
-          <tr><td>Scoped Singleton</td><td>Auth service via closures</td></tr>
-          <tr><td>Template Method</td><td>Reusable lifecycle hooks</td></tr>
-          <tr><td>Memento Pattern</td><td>Undo/redo, session restore</td></tr>
-          <tr><td>Module Federation</td><td>Microfrontend architecture</td></tr>
-        </tbody>
-      </table>
-    </section>
+  <h2>🚀 Performance & Optimization</h2>
+  <ul>
+    <li>Lazy-load components and routes with <code>React.lazy</code>.</li>
+    <li>Use service workers and manifest for PWA features.</li>
+    <li>Defer non-critical assets and optimize event listeners.</li>
+    <li>Monitor performance with Lighthouse, web-vitals, and Chrome DevTools.</li>
+  </ul>
 
-    <section>
-      <h2>🔐 Security</h2>
-      <ul>
-        <li>Use <strong>CSP nonces</strong> for all dynamic scripts</li>
-        <li>Apply <strong>Zero Trust</strong>:
-          <ul>
-            <li>Check all tokens server-side</li>
-            <li>Validate roles and ownership on each request</li>
-          </ul>
-        </li>
-        <li>Follow <strong>Least Privilege</strong>:
-          <ul>
-            <li>UI and API access restricted to only what's needed</li>
-            <li>Role checks at both component and endpoint level</li>
-          </ul>
-        </li>
-      </ul>
-    </section>
-  </main>
+  <h2>🧪 Testing & Build Pipeline</h2>
+  <ul>
+    <li>Use <code>jest</code>, <code>@testing-library/react</code>, and <code>cypress</code>.</li>
+    <li>Integrate with GitHub Actions for CI/CD.</li>
+    <li>Track code coverage and enforce lint/build/test gates on all PRs.</li>
+  </ul>
+
+  <h2>♻️ Reusable Design Patterns</h2>
+  <ul>
+    <li>Dependency Injection via Context Providers</li>
+    <li>Observer pattern with <code>useEffect</code></li>
+    <li>State Machines with <a href="https://xstate.js.org/">XState</a></li>
+    <li>Command, Strategy, Adapter, Facade, and Repository patterns</li>
+  </ul>
+
+  <h2>🔐 Security</h2>
+  <ul>
+    <li>Use CSP nonces for inline scripts.</li>
+    <li>Apply Zero Trust: validate all tokens server-side.</li>
+    <li>Enforce Least Privilege at both UI and API layers.</li>
+  </ul>
+
+  <hr />
 
   <footer>
-    <p>🌐 <a href="https://myTech.Today/" target="_blank"><strong>myTech.Today</strong></a> | 📧 <a href="mailto:sales@mytech.today">sales@mytech.today</a> | 📞 <a href="tel:18477674914">(847) 767-4914</a> | 🧑‍💻 <a href="https://github.com/mytech-today-now" target="_blank">@mytech-today-now</a> | 📍 Barrington, IL</p>
+    <p><strong>Contact:</strong></p>
+    <p>🌐 <a href="https://mytech.today">myTech.Today</a></p>
+    <p>📧 <a href="mailto:sales@mytech.today">sales@mytech.today</a></p>
+    <p>📞 <a href="tel:+18477674914">(847) 767-4914</a></p>
+    <p>🧑‍💻 <a href="https://github.com/mytech-today-now">@mytech-today-now</a></p>
+    <p>📍 Barrington, IL</p>
   </footer>
 </body>
 </html>
