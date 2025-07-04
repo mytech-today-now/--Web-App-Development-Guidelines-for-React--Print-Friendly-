@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AI ToDo MCP – PWA Design Prompt</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>🧠 AI ToDo MCP – PWA Design Prompt + MCP Command Syntax</h1>
+  </header>
+
+  <section>
+    <h2>🚀 Project Prompt</h2>
+    <p>You are a full-stack senior software engineer helping me design a <strong>Progressive Web Application (PWA)</strong> called <strong>AI ToDo MCP</strong>. The application is an <strong>AI-powered task management system</strong> that uses a <strong>Modular Command Protocol (MCP)</strong> at its core.</p>
+
+    <p>Design this app to support <strong>AI agents</strong> that can act on list items autonomously and collaboratively.</p>
+
+    <h3>🎯 Key Functional Goals</h3>
+    <ul>
+      <li>Users can create and manage multiple <strong>lists</strong>, each with multiple <strong>items</strong>.</li>
+      <li>Items may be <strong>nested lists (sub-lists)</strong>—these are treated as objects that can be <strong>executed as a batch</strong> by AI.</li>
+      <li>AI Agents can execute, mark done, reorder, rename, get status, create, or delete items/lists.</li>
+      <li>All system actions follow a readable, composable <strong>Modular Command Protocol (MCP)</strong>.</li>
+      <li>Support for <strong>agent roles and permissions</strong> (reader, executor, planner).</li>
+      <li>Build as a <strong>PWA</strong>: offline-ready, installable, responsive.</li>
+      <li>Frontend: <strong>React + Tailwind CSS</strong>.</li>
+      <li>Backend: <strong>Node.js/Express + SQLite/PostgreSQL</strong>.</li>
+      <li>Integrate an <strong>AI assistant</strong> via OpenAI-compatible API to interpret MCP commands.</li>
+      <li>Include a web-based <strong>command-line interface (CLI)</strong>.</li>
+      <li>Log all AI agent actions with <strong>timestamps</strong> and <strong>rollback support</strong>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>📦 Deliverables</h2>
+    <ul>
+      <li>Project architecture and component flow</li>
+      <li>UI wireframes or layout descriptions</li>
+      <li>MCP command specification</li>
+      <li>AI agent roles, permissions, and behaviors</li>
+      <li>Database schema (lists, items, agents, logs)</li>
+      <li>CLI interface example</li>
+      <li>Sample ToDo items + AI execution logic</li>
+      <li>PWA requirements breakdown</li>
+      <li>Extensibility, sandboxing, and AI model integration suggestions</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>🔧 MCP Command Syntax</h2>
+    <p><strong>Format:</strong></p>
+    <code>[action]:[target_type]:[target_identifier]{[parameters]}</code>
+
+    <h3>🛠️ Actions</h3>
+    <ul>
+      <li><code>create</code> – Create item, list, or agent</li>
+      <li><code>read</code> – Retrieve info or status</li>
+      <li><code>update</code> – Change metadata</li>
+      <li><code>delete</code> – Remove something</li>
+      <li><code>execute</code> – Perform task (or batch)</li>
+      <li><code>reorder</code> – Rearrange order</li>
+      <li><code>rename</code> – Change name</li>
+      <li><code>status</code> – Get current status</li>
+      <li><code>mark_done</code> – Mark as completed</li>
+      <li><code>copy</code> – Duplicate item or list</li>
+    </ul>
+
+    <h3>🎯 Targets</h3>
+    <ul>
+      <li><code>list</code> – Full ToDo list (includes sub-lists)</li>
+      <li><code>item</code> – Individual task</li>
+      <li><code>agent</code> – AI Agent</li>
+      <li><code>system</code> – Meta command</li>
+    </ul>
+
+    <h3>🧱 Nested Lists</h3>
+    <p>Lists may include <strong>sub-lists</strong> as tasks. Executing a list will execute all nested lists in batch order.</p>
+
+    <h3>🧷 Examples</h3>
+    <pre><code>create:list:weekend_batch{"title":"Weekend Tasks"}
+create:list:errands{"parent":"weekend_batch"}
+create:item:get_gas{"list":"errands"}
+execute:list:errands{}
+mark_done:list:errands{}
+status:list:weekend_batch{"recursive":true}
+</code></pre>
+  </section>
+
+  <section>
+    <h2>🔄 AI Agent Execution Loop</h2>
+    <pre><code>async function agentExecutionLoop(agentId) {
+  while (true) {
+    const nextTask = await fetchNextExecutableTask(agentId);
+
+    if (!nextTask) {
+      await waitForNewTask();
+      continue;
+    }
+
+    const { command, metadata } = nextTask;
+
+    try {
+      logAgentAction(agentId, command, "started");
+
+      const { action, targetType, targetId, params } = parseMCP(command);
+
+      if (!hasPermission(agentId, action, targetType)) {
+        throw new Error("Permission denied");
+      }
+
+      switch (action) {
+        case "execute":
+          if (targetType === "item") {
+            await executeItem(targetId, agentId, params);
+          }
+          if (targetType === "list") {
+            const subItems = await getOrderedListItems(targetId);
+            for (const item of subItems) {
+              if (item.type === "list") {
+                await executeCommand(`execute:list:${item.id}{}`);
+              } else {
+                await executeItem(item.id, agentId);
+              }
+            }
+          }
+          break;
+
+        case "mark_done":
+          await markAsDone(targetType, targetId);
+          break;
+
+        case "reorder":
+          await reorderItem(targetId, params);
+          break;
+
+        case "rename":
+          await renameTarget(targetType, targetId, params.new_name);
+          break;
+
+        case "status":
+          const status = await getStatus(targetType, targetId, params);
+          await reportStatusToUser(agentId, targetId, status);
+          break;
+
+        default:
+          throw new Error(`Unknown MCP action: ${action}`);
+      }
+
+      logAgentAction(agentId, command, "completed");
+
+    } catch (err) {
+      logAgentAction(agentId, command, "error", err.message);
+      if (metadata.retryable) {
+        queueRetry(agentId, command);
+      }
+    }
+  }
+}
+</code></pre>
+  </section>
+
+</body>
+</html>
